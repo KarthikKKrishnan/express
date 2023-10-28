@@ -152,3 +152,79 @@
     </script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form onsubmit="submitHandler(event)">
+        <input name="todo" type="text" id="todo" placeholder="todo">
+        <button type="submit">Submit</button>
+    </form>
+    <ol id="list"></ol>
+
+    <script>
+        let list = document.getElementById("list");
+        let todoInput = document.getElementById("todo");
+
+        function print() {
+            fetch("/api")
+                .then((res) => res.json())
+                .then((data) => {
+                    list.innerHTML = "";
+                    data.forEach((element) => {
+                        let li = `<li>${element}<button onclick="del('${element}')">delete</button>
+                            <button onclick="edit('${element}')">edit</button>
+                            </li>`;
+                        list.innerHTML += li;
+                    });
+                });
+        }
+        print();
+
+        function submitHandler(event) {
+            event.preventDefault();
+            let todo = todoInput.value;
+            fetch("/api?todo=" + todo, {
+                method: "POST",
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+                    print();
+                    todoInput.value = ""; 
+                });
+        }
+
+        function del(todo) {
+            fetch(`/api?todo=${todo}`, {
+                method: "DELETE",
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+                    print();
+                });
+        }
+
+        function edit(oldTodo) {
+            let newTodo = prompt("Enter new todo");
+            if (newTodo) {
+                fetch(`/api?oldTodo=${oldTodo}&newTodo=${newTodo}`, {
+                    method: "PUT",
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        console.log(data);
+                        print();
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
+
